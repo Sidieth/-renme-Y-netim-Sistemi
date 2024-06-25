@@ -1,1 +1,1 @@
-# -renme-Y-netim-Sistemi
+# -öğrenme-Yönetim-Sistemi
