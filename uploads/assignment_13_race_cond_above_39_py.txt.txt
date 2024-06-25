@@ -1,0 +1,83 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+'''
+Describe :
+  Describes what the program does
+
+Execute :
+  python filename.py [option] [argument] ...
+  ./filename.py [option] [argument] ...
+
+Copyright :
+  (C) <date> <name> ...
+
+Reference :
+  This code is in the public domain.
+  Link : https://superfastpython.com/thread-race-condition-shared-variable/
+
+Other Links :
+  https://stackoverflow.com/questions/7273474/behavior-of-pythons-time-sleep0-under-linux-does-it-cause-a-context-switch
+'''
+# Example of a race condition with a shared variable (Python 3.10+)
+from threading import Thread
+from time import sleep
+
+# define the global variable shared by threads
+value = 0
+ 
+# make additions into the global variable
+def adder(amount, repeats) :
+  global value
+
+  # _ is a throwaway variable and indicates that the loop variable isn't actually used.
+  # it permanently stops holding the output value of the previous expression.
+  for _ in range(repeats) :
+    # copy the value
+    tmp = value
+    # suggest a context switch
+    sleep(0)
+    # change the copy
+    tmp += amount
+    # suggest a context switch
+    sleep(0)
+    # copy the value back
+    value = tmp
+ 
+# make subtractions from the global variable
+def subtractor(amount, repeats) :
+  global value
+
+  for _ in range(repeats) :
+    # copy the value
+    tmp = value
+    # suggest a context switch
+    sleep(0)
+    # change the copy
+    tmp = tmp - amount
+    # suggest a context switch
+    sleep(0)
+    # copy the value back
+    value = tmp
+
+def main() :
+  # configure a thread making additions
+  adder_thread = Thread(target=adder, args=(100, 10000))
+  # start the thread
+  adder_thread.start()
+
+  # configure a thread making subtractions
+  subtractor_thread = Thread(target=subtractor, args=(100, 10000))
+  # start the thread
+  subtractor_thread.start()
+
+  # wait for both threads to finish
+  print('Waiting for threads to finish ...')
+  adder_thread.join()
+  subtractor_thread.join()
+
+  # report the value
+  print(f"Value: {value}")
+
+if __name__ == '__main__' :
+  main()
+

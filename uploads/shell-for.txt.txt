@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# The following script adds the numbers 1 through 10:
+# This example also illustrates the use of the expr command to evaluate an expression.
+
+sum=0
+
+# for-each loop
+for i in 1 2 3 4 5 6 7 8 9 10
+do
+  sum=$(expr $sum + $i)
+  #sum=`expr $sum + $i`
+done
+
+echo "Sum = $sum"

@@ -1,0 +1,157 @@
+
+Manual for chmod command
+$ man chmod
+
+Help for chmod command
+$ chmod --help
+
+Create a test file
+$ touch test
+
+List directory content
+-l : use a long listing format
+$ ls -l
+
+The very first character represents the file type. It will be one of:
+
+   -: regular file
+   b: block special file
+   c: character special file
+   d: directory
+   l: symbolic link
+   n: network file
+   p: named pipe
+   s: socket
+
+Everything is a file in a unix-style file system.
+Link : https://en.wikipedia.org/wiki/Unix_file_types
+
+In case folder1 exists then mkdir prints the error of "cannot create directory ‘folder1’: File exists"
+$ mkdir folder1
+
+Understanding the long format of the command ls
+Link : https://linuxconfig.org/understanding-of-ls-command-with-a-long-listing-format-output-with-permission-bits
+
+The inode is a data structure in a Unix-style file system that describes a file-system object such as a file or a directory.  Each inode stores the attributes and disk block locations of the object's data. File-system object attributes may include metadata, as well as owner and permission data. 
+
+-i, --inode : print the index number of each file
+$ ls -li
+
+
+Difference between inode, hard link and symbolic link (aka soft link)
+Link : https://stackoverflow.com/questions/185899/what-is-the-difference-between-a-symbolic-link-and-a-hard-link
+
+
+A new directory have a hard link count of 2 before anything is added to it. 
+Link : https://unix.stackexchange.com/questions/101515/why-does-a-new-directory-have-a-hard-link-count-of-2-before-anything-is-added-to
+
+Historically, the first Unix filesystem created two entries in every directory : . pointing to the directory itself, and .. pointing to its parent. This provided an easy way to traverse the filesystem, both for applications and for the OS itself.
+
+Thus each directory has a link count of 2+n where n is the number of subdirectories. The links are the entry for that directory in its parent, the directory's own . entry, and the .. entry in each subdirectory. 
+
+For example, suppose this is the content of the subtree rooted at /parent, all directories:
+
+/parent
+/parent/dir
+/parent/dir/sub1
+/parent/dir/sub2
+/parent/dir/sub3
+
+$ mkdir -p ./parent/dir/sub1
+$ mkdir ./parent/dir/sub2
+$ mkdir ./parent/dir/sub3
+
+$ cd ./parent/dir
+$ $ ls -l
+
+
+Create a new hard link (pattern : ln file link)
+$ ln test test1
+
+Create a symbolic link (pattern : ln -s file link)
+$ ln -s test test2
+$ ln -s test1 test3
+
+-i, --inode : print the index number of each file
+$ ls -li
+
+$ python -c 'a = 5 ; b = 5; print(id(a)); print(id(b))'
+
+If you use -L option, that asks to get file information after resolving symlinks :
+-L, --dereference : when showing file information for a symbolic link, show information for the file the link references rather than for the link itself
+$ ls -liL
+
+Determining if a file is a hard link or symbolic link
+Link : https://unix.stackexchange.com/questions/167610/determining-if-a-file-is-a-hard-link-or-symbolic-link
+
+$ test -h test ; echo $?  ## 0 (true) if the file is a symbolic link
+$ test -L test ; echo $?  ## 0 (true) if the file is a symbolic link
+
+
+Remove execution permission from all users
+$ chmod a-x test
+$ chmod -x test
+$ chmod a=rw test
+
+Other chmod examples
+$ chmod u=rwx,g=rx,o=r test
+$ chmod o=r,u=rwx,g=rx test
+
+$ chmod u+rwx,g-rx,o-r test
+$ chmod o-r,u+rwx,g=rx test
+
+$ chmod o-r, u+rwx, g=rx test  # error, no change
+$ chmod o-r ,u+rwx ,g=rx test  # error, others change
+
+$ chmod 774 test test1
+
+$ chmod -R 774 {directory}
+
+
+Example of using unnamed pipes for IPC
+$ cut -d : -f1 /etc/passwd | grep -P "user.+"
+
+Example of using named pipes (like message passing in FIFO) for IPC
+Shell for writer
+$ mkfifo myPipe
+$ echo 'Hello named pipe!' > myPipe
+
+Shell for reader
+$ cat myPipe
+
+Example of using shared memory for IPC
+$ gcc writer.c -o writer.exe
+$ gcc reader.c -o reader.exe
+
+Shell for writer
+$ ./writer.exe
+
+Shell for reader
+$ ./reader.exe
+
+
+Real User ID vs Effective User ID
+---------------------------------
+$ ./writer.exe &
+$ ps -eo pid,user,ruid,euid,stime,args
+
+$ sudo ./writer.exe &
+$ ps -eo pid,user,ruid,euid,stime,args
+
+-e    Select all processes.
+-o format
+      User-defined format.  format is a single argument in the
+      form of a blank-separated or comma-separated list, which
+      offers a way to specify individual output columns. 
+
+
+$ members salanda
+$ sudo gpasswd -a user1 salanda
+
+
+Change owner of a file
+$ sudo chown user1 writer.exe reader.exe
+
+Change group of a file
+$ sudo chgrp user1 writer.exe reader.exe
+

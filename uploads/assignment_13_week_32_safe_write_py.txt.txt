@@ -1,0 +1,64 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+'''
+Describe :
+  Describes what the program does
+
+Execute :
+  python filename.py [option] [argument] ...
+  ./filename.py [option] [argument] ...
+
+  ./safe_write.py && cat output2.txt | wc -l && rm output2.txt
+
+Copyright :
+  (C) <date> <name> ...
+
+Reference :
+  This code is in the public domain.
+  Link : https://superfastpython.com/thread-safe-write-to-file-in-python/
+'''
+# Example of thread-safe writing to a file
+# import the modules
+from threading import Thread, Lock
+from random import random
+ 
+# task for worker threads
+def task(number, repeats, file, lock) :
+  # task loop
+  for _ in range(repeats) :
+    # generate random number between 0 and 1
+    value = random()
+
+    lock.acquire()
+    # write to the file
+    file.write(f'Thread {number} got {value}.\n')  # critical section
+    lock.release()
+
+def main() :
+  # create a Lock instance for the shared resource
+  lock = Lock()
+
+  # defile the shared file path
+  filepath = 'output2.txt'
+
+  # open the file
+  file = open(filepath, 'a')
+
+  # configure many threads
+  threads = [Thread(target=task, args=(i, 100, file, lock)) for i in range(100)]
+
+  # start the threads
+  for thread in threads :
+    thread.start()
+
+  # wait for the threads to finish
+  print('Waiting for threads to finish ...')
+  for thread in threads :
+    thread.join()
+
+  # close the file
+  file.close()
+
+if __name__ == '__main__' :
+  main()
+

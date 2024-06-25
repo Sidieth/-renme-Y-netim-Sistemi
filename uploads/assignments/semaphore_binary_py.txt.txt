@@ -1,0 +1,67 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+'''
+Describe :
+  Describes what the program does
+
+Execute :
+  python filename.py [option] [argument] ...
+  ./filename.py [option] [argument] ...
+
+  ./semaphore_binary.py && cat output3.txt | wc -l && rm output3.txt
+
+Copyright :
+  (C) <date> <name> ...
+
+Reference :
+  This code is in the public domain.
+  Link :
+'''
+# Example of thread-safe writing to a file
+# importing the modules
+from threading import Thread, Semaphore
+from random import random
+
+# task for worker threads
+def task(number, repeats, file, semaphore) :
+  # task loop
+  for i in range(repeats) :
+    # generate random number between 0 and 1
+    value = random()
+
+    semaphore.acquire()
+    # write to the file
+    file.write(f'Thread {number} got {value}.\n')  # critical section
+    semaphore.release()
+
+def main() :
+  # creating a Semaphore instance where count should be 1
+  # if count is above 1 then race condition occurs
+  # you can call Semaphore constructor without any argument as well.
+  count = 1
+  semaphore = Semaphore(count)		 
+
+  # defile the shared file path
+  filepath = 'output3.txt'
+
+  # open the file
+  file = open(filepath, 'a')
+
+  # configure many threads
+  threads = [Thread(target=task, args=(i, 100, file, semaphore)) for i in range(100)]
+
+  # start the threads
+  for thread in threads :
+    thread.start()
+
+  # wait for all threads to finish
+  print('Waiting for threads to finish ...')
+  for thread in threads :
+    thread.join()
+
+  # close the file
+  file.close()
+
+if __name__ == '__main__' :
+  main()
+
